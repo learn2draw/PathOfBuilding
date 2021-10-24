@@ -837,8 +837,8 @@ local function doActorMisc(env, actor)
 			modDB:NewMod("AvoidChaosDamageChance", "BASE", m_floor(15 * effect), "Elusive")
 			modDB:NewMod("MovementSpeed", "INC", m_floor(30 * effect), "Elusive")
 			if modDB:Flag(nil, "Nightblade") then 
-				local NightbladeCritMutli = modDB:Sum("BASE", nil, "ElusiveCritMultiplier") or 0
-				modDB:NewMod("CritMultiplier", "BASE", m_floor(NightbladeCritMutli * effect), "Nightblade")
+				local nightbladeCritMutli = modDB:Sum("BASE", nil, "ElusiveCritMultiplier") or 0
+				modDB:NewMod("CritMultiplier", "BASE", m_floor(nightbladeCritMutli * effect), "Nightblade")
 			end
 		end
 		if modDB:Flag(nil, "Blind") then
