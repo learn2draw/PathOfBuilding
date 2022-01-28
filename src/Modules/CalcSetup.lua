@@ -563,6 +563,16 @@ function calcs.initEnv(build, mode, override, specEnv)
 				end
 				item = nil
 			end
+			if item and item.type == "Jewel" and item.name == "Forbidden Flame, Prismatic Jewel" then 
+				if item.classRestriction == env.spec.curClassName then
+					env.itemModDB.conditions["ForbiddenFlame"] = item.classRestriction
+				end
+			end
+			if item and item.type == "Jewel" and item.name == "Forbidden Flesh, Prismatic Jewel" then 
+				if item.classRestriction == env.spec.curClassName then
+					env.itemModDB.conditions["ForbiddenFlesh"] = item.classRestriction
+				end
+			end
 			local scale = 1
 			if item and item.type == "Jewel" and item.base.subType == "Abyss" and slot.parentSlot then
 				-- Check if the item in the parent slot has enough Abyssal Sockets
@@ -759,21 +769,34 @@ function calcs.initEnv(build, mode, override, specEnv)
 		end
 	end
 
+	local findBaseClassForAscendency = function (classParam)
+		for _, class in pairs(env.spec.tree.classes) do 
+			for _, ascendency in pairs(class['ascendancies']) do 
+				if ascendency.id == classParam then
+					return class.name
+				end 
+			end
+		end
+	end
+
 	-- Add granted ascendancy node (e.g., Forbidden Flame/Flesh combo)
 	local matchedName = { }
 	for _, ascTbl in pairs(env.modDB:List(nil, "GrantedAscendancyNode")) do
-		local name = ascTbl.name
-		if matchedName[name] and matchedName[name].side ~= ascTbl.side and matchedName[name].matched == false then
-			matchedName[name].matched = true
-			local node = env.spec.tree.ascendancyMap[name]
-			if node and (not override.removeNodes or not override.removeNodes[node.id]) then
-				--print("HI: " .. env.spec.curClassName)
-				env.allocNodes[node.id] = node
-				env.grantedPassives[node.id] = true
+			local name = ascTbl.name
+			if matchedName[name] and matchedName[name].side ~= ascTbl.side and matchedName[name].matched == false then
+				matchedName[name].matched = true
+				local node = env.spec.tree.ascendancyMap[name]
+				local classes = env.spec.tree.classes
+				if node and (not override.removeNodes or not override.removeNodes[node.id]) then
+					local baseClass = findBaseClassForAscendency(node.ascendancyName)
+					if env.itemModDB.conditions["ForbiddenFlesh"] == baseClass and env.itemModDB.conditions["ForbiddenFlame"] == baseClass then
+						env.allocNodes[node.id] = node
+						env.grantedPassives[node.id] = true
+					end
+				end
+			else
+				matchedName[name] = { side = ascTbl.side, matched = false }
 			end
-		else
-			matchedName[name] = { side = ascTbl.side, matched = false }
-		end
 	end
 
 	-- Merge modifiers for allocated passives
